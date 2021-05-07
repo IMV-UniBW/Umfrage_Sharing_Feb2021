@@ -22,7 +22,7 @@ import statsmodels.formula.api as smf
 # einlesen
 import os
 os.chdir(r"C:\Users\katha\OneDrive\Dokumente\To Do")
-df = pd.read_csv(r'.\Umfrage_Ilona.csv', error_bad_lines=False, sep = ';')
+df = pd.read_csv(r'.\Umfrage_Ilona.csv', error_bad_lines=False, sep = ';', encoding='iso-8859-1')
 df.rename(columns={'Unnamed: 0': 'interview'}, inplace=True)
 df = df.drop([0,1])
 
@@ -171,16 +171,18 @@ n = len(df_short)
 # -----------------------------------------------------
 # Sharing Erfahrung 2019
 # -----------------------------------------------------
-per_sharing_all = sum(df_short.Sharing_2019[~np.isnan(df_short.Sharing_2019.astype('float'))].astype('int')-1)/n
-per_sharing_car = sum(df_short.Sharing_2019_Carsharing[~np.isnan(df_short.Sharing_2019_Carsharing.astype('float'))-1].astype('int'))/n
-per_sharing_bike = sum(df_short.Sharing_2019_Bikesharing[~np.isnan(df_short.Sharing_2019_Bikesharing.astype('float'))-1].astype('int'))/n
-per_sharing_scooter = sum(df_short.Sharing_2019_Roller[~np.isnan(df_short.Sharing_2019_Roller.astype('float'))].astype('int'))/n
-per_sharing_other = sum(df_short.Sharing_2019_andere[~np.isnan(df_short.Sharing_2019_andere.astype('float'))].astype('int'))/n
+per_sharing_all = sum(df_short.Sharing_2019[~np.isnan(df_short.Sharing_2019.astype('float'))].astype('int')-1)/sum(~np.isnan(df_short.Sharing_2019.astype('float')))
+per_sharing_car = sum(df_short.Sharing_2019_Carsharing[~np.isnan(df_short.Sharing_2019_Carsharing.astype('float'))].astype('int')-1)/sum(~np.isnan(df_short.Sharing_2019_Carsharing.astype('float')))
+per_sharing_bike = sum(df_short.Sharing_2019_Bikesharing[~np.isnan(df_short.Sharing_2019_Bikesharing.astype('float'))].astype('int')-1)/sum(~np.isnan(df_short.Sharing_2019_Bikesharing.astype('float')))
+per_sharing_scooter = sum(df_short.Sharing_2019_Roller[~np.isnan(df_short.Sharing_2019_Roller.astype('float'))].astype('int')-1)/sum(~np.isnan(df_short.Sharing_2019_Roller.astype('float')))
+per_sharing_other = sum(df_short.Sharing_2019_andere[~np.isnan(df_short.Sharing_2019_andere.astype('float'))].astype('int')-1)/sum(~np.isnan(df_short.Sharing_2019_andere.astype('float')))
 labels = ['Alle', 'Auto', 'Fahrrad', 'Roller/Scooter', 'Andere']
 x = [per_sharing_all, per_sharing_car, per_sharing_bike, per_sharing_scooter, per_sharing_other]
 fig, ax = plt.subplots()
 rects1 = ax.bar(range(len(x)), x )
 ax.set_ylabel('Prozent')
+plt.xticks(range(len(x)))
+
 ax.set_title('Sharing Erfahrung mit...')
 ax.set_xticklabels(labels)
 ax.legend()
@@ -188,11 +190,11 @@ ax.legend()
 # -----------------------------------------------------
 # Sharing Erfahrung 2020
 # -----------------------------------------------------
-per_sharing_all = sum(df_short.Sharing_2020[~np.isnan(df_short.Sharing_2020.astype('float'))].astype('int'))/n
-per_sharing_car = sum(df_short.Sharing_2020_Carsharing[~np.isnan(df_short.Sharing_2020_Carsharing.astype('float'))].astype('int'))/n
-per_sharing_bike = sum(df_short.Sharing_2020_Bikesharing[~np.isnan(df_short.Sharing_2020_Bikesharing.astype('float'))].astype('int'))/n
-per_sharing_scooter = sum(df_short.Sharing_2020_Roller[~np.isnan(df_short.Sharing_2020_Roller.astype('float'))].astype('int'))/n
-per_sharing_other = sum(df_short.Sharing_2020_andere[~np.isnan(df_short.Sharing_2020_andere.astype('float'))].astype('int'))/n
+per_sharing_all = sum(df_short.Sharing_2020[~np.isnan(df_short.Sharing_2020.astype('float'))].astype('int')-1)/sum(~np.isnan(df_short.Sharing_2020.astype('float')))
+per_sharing_car = sum(df_short.Sharing_2020_Carsharing[~np.isnan(df_short.Sharing_2020_Carsharing.astype('float'))].astype('int')-1)/sum(~np.isnan(df_short.Sharing_2020_Carsharing.astype('float')))
+per_sharing_bike = sum(df_short.Sharing_2020_Bikesharing[~np.isnan(df_short.Sharing_2020_Bikesharing.astype('float'))].astype('int')-1)/sum(~np.isnan(df_short.Sharing_2020_Bikesharing.astype('float')))
+per_sharing_scooter = sum(df_short.Sharing_2020_Roller[~np.isnan(df_short.Sharing_2020_Roller.astype('float'))].astype('int')-1)/sum(~np.isnan(df_short.Sharing_2020_Roller.astype('float')))
+per_sharing_other = sum(df_short.Sharing_2020_andere[~np.isnan(df_short.Sharing_2020_andere.astype('float'))].astype('int')-1)/sum(~np.isnan(df_short.Sharing_2020_andere.astype('float')))
 labels = ['Alle', 'Auto', 'Fahrrad', 'Roller/Scooter', 'Andere']
 x = [per_sharing_all, per_sharing_car, per_sharing_bike, per_sharing_scooter, per_sharing_other]
 fig, ax = plt.subplots()
@@ -201,17 +203,30 @@ ax.set_ylabel('Prozent')
 ax.set_title('Sharing Erfahrung mit...')
 ax.set_xticklabels(labels)
 ax.legend()
+plt.xticks(range(len(x)))
+
 # ----------------------------------------------------
 # Bereitschaft NUtzung 
 #  -------------------------------------------------
 df_short['Bereitschaft_Sharing2'] = ''
-df_short.loc[df_short['Bereitschaft_Sharing'] == '1', ['Bereitschaft_Sharing2']] = 'ja'
-df_short.loc[df_short['Bereitschaft_Sharing'] == '4', ['Bereitschaft_Sharing2']] = 'ja'
-df_short.loc[df_short['Bereitschaft_Sharing'] == '5', ['Bereitschaft_Sharing2']] = 'nein'
+df_short.loc[df_short['Bereitschaft_Sharing'] == '1', ['Bereitschaft_Sharing2']] = '1'
+df_short.loc[df_short['Bereitschaft_Sharing'] == '4', ['Bereitschaft_Sharing2']] = '1'
+df_short.loc[df_short['Bereitschaft_Sharing'] == '5', ['Bereitschaft_Sharing2']] = '0'
 df_short.loc[df_short['Bereitschaft_Sharing'] == '-9', ['Bereitschaft_Sharing2']] = 'NaN'
-df_short.loc[df_short['Bereitschaft_Sharing'] == '', ['Bereitschaft_Sharing2']] = 'NaN'
-df_short.loc[df_short['Bereitschaft_Sharing'] == 'NaN', ['Bereitschaft_Sharing2']] = 'NaN'
+df_short.loc[np.isnan(df_short.Bereitschaft_Sharing.astype('float')), 'Bereitschaft_Sharing2'] = 'NaN'
 
-sns.catplot(x="Bereitschaft_Sharing2", kind = 'count', data=df_short)
+sns.catplot(x="Bereitschaft_Sharing2", kind = 'count', data=df_short[~np.isnan(df_short.Bereitschaft_Sharing2.astype('float'))])
 
-sum(df_short.Sharing_2019[~np.isnan(df_short.Sharing_2019.astype('float'))])
+# ----------------------------------------------------
+# Anforderungen
+# ----------------------------------------------------
+anforderungen = df_short.Anforderungen1.tolist()
+for i in range(2,10):
+    temp_list = eval("df_short.Anforderungen" + str(i))
+    anforderungen.extend(temp_list.tolist())
+
+anforderungen_sortiert = np.unique(anforderungen)
+df_anforderungen = pd.DataFrame(anforderungen_sortiert, columns = ['Anforderungen'])
+df_anforderungen.to_pickle("anforderungen_sharing.csv")
+
+np.savetxt("anforderungen_sharing.csv", anforderungen_sortiert,  fmt = '%s') #delimiter=",",
