@@ -5,18 +5,18 @@ Created on Wed May  5 08:56:42 2021
 @author: katha
 """
 
+
+# to do
+# PLZ: only print integers, get rid of letters
+
+# ----------------------------------------------------
+# Data Preparation
+# -------------------------------------------------------
 # import modules
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import StandardScaler
-from patsy import dmatrices
 import seaborn as sns
-from scipy import stats
-from statsmodels.formula.api import ols
-from statsmodels.stats.outliers_influence import variance_inflation_factor
-import statsmodels.api as sm
-import statsmodels.formula.api as smf
 
 # ilonas Umfrage
 # einlesen
@@ -24,9 +24,9 @@ import os
 os.chdir(r"C:\Users\katha\OneDrive\Dokumente\To Do")
 df = pd.read_csv(r'.\Umfrage_Ilona.csv', error_bad_lines=False, sep = ';', encoding='iso-8859-1')
 df.rename(columns={'Unnamed: 0': 'interview'}, inplace=True)
-df = df.drop([0,1])
+df = df.drop([0,1]).reset_index()
 
-#VAR'
+# select variables
 varlist = ['A101',
 'A107',
 'RB02',
@@ -107,11 +107,9 @@ varlist = ['A101',
 'AV06_07',
 'AV06_06',
 'AV06_06a']
-
-# kürzen
 df_short = df[varlist]
 
-# umbenennen
+# rename
 new_columns = {'A101': 'Autobesitz',
                 'A107': 'Autoleistung',
 'RB02': 'Zeitkarte',
@@ -166,6 +164,9 @@ df_short.rename(columns=new_columns, inplace=True)
 
 # info
 n = len(df_short)
+
+
+
 ######################################################################
 # Univariate Descriptives
 # -----------------------------------------------------
@@ -209,13 +210,12 @@ plt.xticks(range(len(x)))
 # Bereitschaft NUtzung 
 #  -------------------------------------------------
 df_short['Bereitschaft_Sharing2'] = ''
-df_short.loc[df_short['Bereitschaft_Sharing'] == '1', ['Bereitschaft_Sharing2']] = '1'
-df_short.loc[df_short['Bereitschaft_Sharing'] == '4', ['Bereitschaft_Sharing2']] = '1'
-df_short.loc[df_short['Bereitschaft_Sharing'] == '5', ['Bereitschaft_Sharing2']] = '0'
-df_short.loc[df_short['Bereitschaft_Sharing'] == '-9', ['Bereitschaft_Sharing2']] = 'NaN'
-df_short.loc[np.isnan(df_short.Bereitschaft_Sharing.astype('float')), 'Bereitschaft_Sharing2'] = 'NaN'
-
-sns.catplot(x="Bereitschaft_Sharing2", kind = 'count', data=df_short[~np.isnan(df_short.Bereitschaft_Sharing2.astype('float'))])
+df_short.loc[df_short['Bereitschaft_Sharing'] == '1', ['Bereitschaft_Sharing2']] = 1
+df_short.loc[df_short['Bereitschaft_Sharing'] == '4', ['Bereitschaft_Sharing2']] = 1
+df_short.loc[df_short['Bereitschaft_Sharing'] == '5', ['Bereitschaft_Sharing2']] = 0
+df_short.loc[df_short['Bereitschaft_Sharing'] == '-9', ['Bereitschaft_Sharing2']] = -9
+df_short.loc[np.isnan(df_short.Bereitschaft_Sharing.astype('float')), 'Bereitschaft_Sharing2'] = -9
+sns.catplot(x="Bereitschaft_Sharing2", kind = 'count', data=df_short[df_short.Bereitschaft_Sharing2 >= 0])
 
 # ----------------------------------------------------
 # Anforderungen
@@ -229,4 +229,86 @@ anforderungen_sortiert = np.unique(anforderungen)
 df_anforderungen = pd.DataFrame(anforderungen_sortiert, columns = ['Anforderungen'])
 df_anforderungen.to_pickle("anforderungen_sharing.csv")
 
-np.savetxt("anforderungen_sharing.csv", anforderungen_sortiert,  fmt = '%s') #delimiter=",",
+# ----------------------------------------------------
+# Who took part
+# ----------------------------------------------------
+
+# age
+df_short.loc[df_short['Alter'] == '-9', ['Alter']] = 'NaN'
+df_short.loc[np.isnan(df_short.Alter.astype('float')), 'Alter'] = 'NaN'
+df_short['Alter'] = df_short.Alter.astype('float')
+labels = ['jünger als 20', '20 bis 34','35 bis 49','50 bis 64','65 oder älter']
+g = sns.catplot(x = 'Alter', kind = 'count', data=df_short[~np.isnan(df_short.Alter.astype('float'))])
+g.set_xticklabels(labels)
+
+# On-Campus vs. off campus
+label_campus = ['on-campus', 'off-campus']
+df_short.loc[df_short['Campusbewohner'] == '-9', ['Campusbewohner']] = 'NaN'
+df_short.loc[np.isnan(df_short.Campusbewohner.astype('float')), 'Campusbewohner'] = 'NaN'
+df_short['Campusbewohner'] = df_short.Campusbewohner.astype('float')
+g = sns.catplot(x = 'Campusbewohner', kind = 'count', data=df_short[~np.isnan(df_short.Campusbewohner.astype('float'))])
+g.set_xticklabels(label_campus)
+
+# PLZ
+g = sns.catplot(x = 'PLZ', kind = 'count', data=df_short)
+# PLZ nach Häufigkeit sortieren
+
+
+# Gruppe
+# 1: Student mil, 2: Student ziv, 3: mil Personal, 4: wimis, 5: Prof, 6: verwaltung, 7:Hiwis
+label_gruppe =  ['nan','milStu', 'zivStu', 'milPer', 'wimi', 'prof', 'admin', 'hiwis']
+#df_short.loc[df_short['Gruppe'] == '-9', ['Gruppe']] = 'nan'
+df_short.loc[np.isnan(df_short.Gruppe.astype('float')), 'Gruppe'] = '-9''
+df_short['Gruppe']  = df_short['Gruppe'].astype('int')
+
+g = sns.catplot(x = 'Gruppe', kind = 'count', data=df_short[~np.isnan(df_short.Gruppe.astype('float'))])
+
+
+
+'SD01':	'Geschlecht',
+'SD19':	'Haushalt',
+'SD20':	'Kinder',
+'SD11':	'Bildungsabschluss',
+'SD11_10':	'Bildungsabschluss2',
+'SD17':	'Einkommen',
+'SD22':	'Gruppe',
+'V901':	'Taetigkeit_2019',
+######################################################################
+# Multivariate Descriptives
+
+# ----------------------------------------------------
+# Who are the Users, who are the nonusers? 
+#  -------------------------------------------------
+# Bereitschaft
+# -nach gruppe
+g = sns.FacetGrid(df_short[(df_short['Gruppe']>0) & (df_short['Bereitschaft_Sharing2']>=0)], col="Bereitschaft_Sharing2")
+g.map_dataframe(sns.histplot,"Gruppe")
+g.set(xticks=range(8))
+g.set_xticklabels(label_gruppe, rotation = 45)#label_gruppe
+# nach unterkunft
+g = sns.FacetGrid(df_short[ (df_short['Bereitschaft_Sharing2']>=0)], col="Bereitschaft_Sharing2")
+g.map_dataframe(sns.histplot,"Campusbewohner")
+g.set(xticks=range(1,3))
+g.set_xticklabels(label_campus, rotation = 45)#label_gruppe
+
+#Sharing Erfahrung + Gruppe
+g = sns.FacetGrid(df_short[df_short['Gruppe']>0], col="Sharing_2019")
+g.map_dataframe(sns.histplot,"Gruppe")
+g.set(xticks=range(1,8))
+g.set_xticklabels(label_gruppe[1:], rotation = 45)#label_gruppe
+
+g = sns.FacetGrid(df_short[df_short['Gruppe']>0], col="Sharing_2020")
+g.map_dataframe(sns.histplot,"Gruppe")
+g.set(xticks=range(1,8))
+g.set_xticklabels(label_gruppe[1:], rotation = 45)#label_gruppe
+
+g = sns.FacetGrid(df_short[df_short['Gruppe']>0], col="Sharing_2019_Carsharing")
+g.map_dataframe(sns.histplot,"Gruppe")
+g.set(xticks=range(1,8))
+g.set_xticklabels(label_gruppe[1:], rotation = 45)#label_gruppe
+
+g = sns.FacetGrid(df_short[df_short['Gruppe']>0], col="Sharing_2020_Carsharing")
+g.map_dataframe(sns.histplot,"Gruppe")
+g.set(xticks=range(1,8))
+g.set_xticklabels(label_gruppe[1:], rotation = 45)#label_gruppe
+
